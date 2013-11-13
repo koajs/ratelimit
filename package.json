@@ -1,0 +1,26 @@
+{
+  "name": "koa-ratelimit",
+  "description": "Rate limiter middleware for koa",
+  "repository": "koajs/ratelimit",
+  "version": "1.0.0",
+  "keywords": [
+    "koa",
+    "middleware",
+    "ratelimiter",
+    "ratelimit",
+    "rate"
+  ],
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "ratelimiter": "~1.0.0",
+    "thunkify": "0.0.1",
+    "debug": "~0.7.4"
+  },
+  "devDependencies": {
+    "koa": "0.0.2",
+    "redis": "~0.9.0"
+  },
+  "license": "MIT"
+}
