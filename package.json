@@ -2,7 +2,7 @@
   "name": "koa-ratelimit",
   "description": "Rate limiter middleware for koa",
   "repository": "koajs/ratelimit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "koa",
     "middleware",
