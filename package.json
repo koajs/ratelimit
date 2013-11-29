@@ -16,7 +16,8 @@
   "dependencies": {
     "ratelimiter": "~1.0.0",
     "thunkify": "0.0.1",
-    "debug": "~0.7.4"
+    "debug": "~0.7.4",
+    "ms": "~0.6.1"
   },
   "devDependencies": {
     "koa": "0.0.2",
