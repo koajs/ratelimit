@@ -47,17 +47,14 @@ function ratelimit(opts) {
 
 
     debug('remaining %s/%s %s', limit.remaining, limit.total, id);
-    if (limit.remaining) {
-      // it's all good
-      // yield downstream and continue processing request
-      yield next;
-    } else {
-      // it's not good
-      var delta = (limit.reset * 1000) - Date.now() | 0;
-      var after = limit.reset - (Date.now() / 1000) | 0;
-      this.set('Retry-After', after);
-      this.status = 429;
-      this.body = 'Rate limit exceeded, retry in ' + ms(delta, { long: true });
-    }
+    // it's all good; yield to downstream middleware and return.
+    if (limit.remaining) return yield next;
+
+    // it's not good
+    var delta = (limit.reset * 1000) - Date.now() | 0;
+    var after = limit.reset - (Date.now() / 1000) | 0;
+    this.set('Retry-After', after);
+    this.status = 429;
+    this.body = 'Rate limit exceeded, retry in ' + ms(delta, { long: true });
   }
 }
