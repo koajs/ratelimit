@@ -45,12 +45,10 @@ function ratelimit(opts) {
     this.set('X-RateLimit-Remaining', limit.remaining);
     this.set('X-RateLimit-Reset', limit.reset);
 
-    // yield downstream
-    yield next;
 
-    // it's all good
     debug('remaining %s/%s %s', limit.remaining, limit.total, id);
-    if (limit.remaining) return;
+    // it's all good; yield to downstream middleware and return.
+    if (limit.remaining) return yield next;
 
     // it's not good
     var delta = (limit.reset * 1000) - Date.now() | 0;
