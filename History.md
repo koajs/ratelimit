@@ -1,4 +1,9 @@
 
+1.0.3 / 2014-05-24
+==================
+
+ * fix: don't yield to downstream middleware if ratelimit is hit.
+
 1.0.2 / 2014-05-22
 ==================
 
