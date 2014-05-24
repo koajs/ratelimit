@@ -16,7 +16,7 @@ module.exports = ratelimit;
 
 /**
  * Initialize ratelimit middleware with the given `opts`:
- * 
+ *
  * - `duration` limit duration in milliseconds [1 hour]
  * - `max` max requests per `id` [2500]
  * - `db` database connection
@@ -31,13 +31,12 @@ function ratelimit(opts) {
 
   return function *(next){
     var id = this.ip;
-    
+
     // initialize limiter
     var limiter = new Limiter({ id: id, __proto__: opts });
     limiter.get = thunkify(limiter.get);
 
     // check limit
-    // TODO: lame.. add limiter.load() or sth
     var limit = yield limiter.get();
 
     // header fields
@@ -47,10 +46,8 @@ function ratelimit(opts) {
 
 
     debug('remaining %s/%s %s', limit.remaining, limit.total, id);
-    // it's all good; yield to downstream middleware and return.
     if (limit.remaining) return yield next;
 
-    // it's not good
     var delta = (limit.reset * 1000) - Date.now() | 0;
     var after = limit.reset - (Date.now() / 1000) | 0;
     this.set('Retry-After', after);
