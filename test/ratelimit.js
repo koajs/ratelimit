@@ -8,10 +8,10 @@ var ratelimit = require('..');
 var db = redis.createClient();
 
 describe('ratelimit middleware', function() {
-  var app;
+  var rateLimitDuration = 1000;
   var goodBody = "Num times hit: ";
   var guard;
-  var rateLimitDuration = 1000;
+  var app;
 
   var routeHitOnlyOnce = function() {
     guard.should.be.equal(1);
@@ -21,18 +21,16 @@ describe('ratelimit middleware', function() {
     app = koa();
 
     app.use(ratelimit({
-      db: db,
       duration: rateLimitDuration,
+      db: db,
       max: 2
     }));
 
     app.use(function* (next) {
       guard++;
-      console.log('guard is ' + guard);
       this.body = goodBody + guard;
     });
 
-    console.log("Setting guard to 0");
     guard = 0;
 
     setTimeout(function() {
@@ -52,12 +50,10 @@ describe('ratelimit middleware', function() {
   });
 
   it('should not yield downstream if ratelimit is exceeded', function(done) {
-    console.log("Guard after 200 = " + guard);
     request(app.listen())
       .get('/')
       .expect(429)
       .end(function() {
-        console.log("Guard after 429 = " + guard);
         routeHitOnlyOnce();
         done();
       });
