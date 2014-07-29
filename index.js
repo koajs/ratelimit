@@ -20,6 +20,7 @@ module.exports = ratelimit;
  * - `duration` limit duration in milliseconds [1 hour]
  * - `max` max requests per `id` [2500]
  * - `db` database connection
+ * - `id` id to compare requests [ip]
  *
  * @param {Object} opts
  * @return {Function}
@@ -30,7 +31,7 @@ function ratelimit(opts) {
   opts = opts || {};
 
   return function *(next){
-    var id = this.ip;
+    var id = (opts.id && opts.id(this)) || this.ip;
 
     // initialize limiter
     var limiter = new Limiter({ id: id, __proto__: opts });
