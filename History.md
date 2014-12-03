@@ -1,4 +1,9 @@
 
+1.1.0 / 2014-12-03
+==================
+
+  * Adds callback for defining own comparator ID. Fixes #3
+
 1.0.3 / 2014-05-24
 ==================
 
