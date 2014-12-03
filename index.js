@@ -47,7 +47,7 @@ function ratelimit(opts) {
 
 
     debug('remaining %s/%s %s', limit.remaining, limit.total, id);
-    if (limit.remaining) return yield next;
+    if (limit.remaining) return yield* next;
 
     var delta = (limit.reset * 1000) - Date.now() | 0;
     var after = limit.reset - (Date.now() / 1000) | 0;
