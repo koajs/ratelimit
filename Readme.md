@@ -22,7 +22,10 @@ var app = koa();
 app.use(ratelimit({
   db: redis.createClient(),
   duration: 60000,
-  max: 100
+  max: 100,
+  id: function (context) {
+    return context.ip;
+  }
 }));
 
 // response middleware
@@ -40,6 +43,7 @@ console.log('listening on port 3000');
  - `db` redis connection instance
  - `max` max requests within `duration` [2500]
  - `duration` of limit in milliseconds [3600000]
+ - `id` id to compare requests [ip]
 
 ## Responses
 
