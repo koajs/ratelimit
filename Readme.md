@@ -1,6 +1,17 @@
 
 # koa-ratelimit
 
+[![NPM version][npm-image]][npm-url]
+[![build status][travis-image]][travis-url]
+[![node version][node-image]][node-url]
+
+[npm-image]: https://img.shields.io/npm/v/koa-generic-session.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/koa-generic-session
+[travis-image]: https://img.shields.io/travis/koajs/generic-session.svg?style=flat-square
+[travis-url]: https://travis-ci.org/koajs/generic-session
+[node-image]: https://img.shields.io/badge/node.js-%3E=_0.11-red.svg?style=flat-square
+[node-url]: http://nodejs.org/download/
+
  Rate limiter middleware for koa.
 
 ## Installation
@@ -60,7 +71,7 @@ Content-Length: 6
 Date: Wed, 13 Nov 2013 21:22:13 GMT
 Connection: keep-alive
 
-Stuff! 
+Stuff!
 ```
 
   Example 429 response:
