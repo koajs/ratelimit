@@ -5,10 +5,10 @@
 [![build status][travis-image]][travis-url]
 [![node version][node-image]][node-url]
 
-[npm-image]: https://img.shields.io/npm/v/koa-generic-session.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/koa-generic-session
-[travis-image]: https://img.shields.io/travis/koajs/generic-session.svg?style=flat-square
-[travis-url]: https://travis-ci.org/koajs/generic-session
+[npm-image]: https://img.shields.io/npm/v/koa-ratelimit.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/koa-ratelimit
+[travis-image]: https://img.shields.io/travis/koajs/ratelimit.svg?style=flat-square
+[travis-url]: https://travis-ci.org/koajs/ratelimit
 [node-image]: https://img.shields.io/badge/node.js-%3E=_0.11-red.svg?style=flat-square
 [node-url]: http://nodejs.org/download/
 
