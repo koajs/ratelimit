@@ -25,7 +25,7 @@ describe('ratelimit middleware', function() {
       app.use(ratelimit({
         duration: rateLimitDuration,
         db: db,
-        max: 2
+        max: 1
       }));
 
       app.use(function* (next) {
@@ -47,6 +47,7 @@ describe('ratelimit middleware', function() {
     it('responds with 429 when rate limit is exceeded', function(done) {
       request(app.listen())
         .get('/')
+        .expect('X-RateLimit-Remaining', 0)
         .expect(429)
         .end(done);
     });
@@ -79,7 +80,7 @@ describe('ratelimit middleware', function() {
       app.use(ratelimit({
         duration: rateLimitDuration,
         db: db,
-        max: 2,
+        max: 1,
         id: function (ctx) {
           ctx.should.be.ok;
           return ids[guard++]
