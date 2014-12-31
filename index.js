@@ -5,8 +5,8 @@
 
 var debug = require('debug')('koa-ratelimit');
 var Limiter = require('ratelimiter');
-var thunkify = require('thunkify');
 var ms = require('ms');
+var thenify = require('thenify');
 
 /**
  * Expose `ratelimit()`.
@@ -35,7 +35,7 @@ function ratelimit(opts) {
 
     // initialize limiter
     var limiter = new Limiter({ id: id, __proto__: opts });
-    limiter.get = thunkify(limiter.get);
+    limiter.get = thenify(limiter.get);
 
     // check limit
     var limit = yield limiter.get();
