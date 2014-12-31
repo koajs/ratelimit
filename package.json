@@ -20,11 +20,11 @@
     "ms": "~0.6.1"
   },
   "devDependencies": {
-    "koa": "^0.6.1",
-    "mocha": "^1.19.0",
-    "redis": "^0.10.2",
-    "should": "^3.3.1",
-    "supertest": "^0.12.1"
+    "koa": "^0.14.0",
+    "mocha": "^2.1.0",
+    "redis": "^0.12.1",
+    "should": "^4.4.2",
+    "supertest": "^0.15.0"
   },
   "scripts": {
     "test": "NODE_ENV=test node_modules/mocha/bin/mocha --harmony --reporter spec"
