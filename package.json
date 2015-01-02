@@ -14,23 +14,23 @@
     "index.js"
   ],
   "dependencies": {
-    "ratelimiter": "~1.0.0",
-    "thunkify": "0.0.1",
-    "debug": "~0.7.4",
-    "ms": "~0.6.1"
+    "debug": "^2.1.1",
+    "ms": "^0.7.0",
+    "ratelimiter": "^2.0.0",
+    "thenify": "^3.0.0"
   },
   "devDependencies": {
-    "koa": "^0.6.1",
-    "mocha": "^1.19.0",
-    "redis": "^0.10.2",
-    "should": "^3.3.1",
-    "supertest": "^0.12.1"
+    "koa": "^0.14.0",
+    "mocha": "^2.1.0",
+    "redis": "^0.12.1",
+    "should": "^4.4.2",
+    "supertest": "^0.15.0"
   },
   "scripts": {
     "test": "NODE_ENV=test node_modules/mocha/bin/mocha --harmony --reporter spec"
   },
   "engines": {
-    "node": "> 0.11.4"
+    "node": ">= 0.11.13"
   },
   "license": "MIT"
 }
