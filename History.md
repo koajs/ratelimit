@@ -1,4 +1,14 @@
 
+2.0.0 / 2015-01-02 
+==================
+
+  * Merge pull request #10 from seegno/support/update-ratelimiter-2-0-0
+  * Update `debug@2.1.1` and `ms@0.7.0`
+  * Update recommended node version to >= 0.11.13
+  * Update dev dependencies
+  * Update ratelimiter@2.0.0
+  * Replace `thunkify` by `thenify`.
+
 1.1.0 / 2014-12-03
 ==================
 
