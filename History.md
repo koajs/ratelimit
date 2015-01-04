@@ -1,5 +1,13 @@
 
-2.0.0 / 2015-01-02 
+2.1.0 / 2015-01-04
+==================
+
+  * Merge pull request #11 from seegno/support/flush-redis-before-testing
+  * Merge pull request #9 from seegno/enhancement/add-id-verification
+  * Flush redis limit keys before running tests
+  * Add id verification to bypass ratelimiting
+
+2.0.0 / 2015-01-02
 ==================
 
   * Merge pull request #10 from seegno/support/update-ratelimiter-2-0-0
