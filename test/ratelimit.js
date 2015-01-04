@@ -64,50 +64,71 @@ describe('ratelimit middleware', function() {
   });
 
   describe('id', function (done) {
-    var ids = ['id1', 'id2'];
-    var guard = 0;
-    var app;
-
-    var routeHitTimes = function (n) {
-      return function () {
-        guard.should.be.equal(n);
-      }
-    };
-
-    beforeEach(function(done) {
-      app = koa();
+    it('should allow specifying a custom `id` function', function (done) {
+      var app = koa();
 
       app.use(ratelimit({
-        duration: rateLimitDuration,
         db: db,
         max: 1,
         id: function (ctx) {
-          ctx.should.be.ok;
-          return ids[guard++]
+          return ctx.request.header.foo;
+        }
+      }));
+
+      request(app.listen())
+        .get('/')
+        .set('foo', 'bar')
+        .expect(function(res) {
+          res.header['x-ratelimit-remaining'].should.equal('0');
+        })
+        .end(done);
+    });
+
+    it('should not limit if `id` returns `false`', function (done) {
+      var app = koa();
+
+      app.use(ratelimit({
+        db: db,
+        id: function (ctx) {
+          return false;
+        },
+        max: 5
+      }));
+
+      request(app.listen())
+        .get('/')
+        .expect(function(res) {
+          res.header.should.not.have.property('x-ratelimit-remaining');
+        })
+        .end(done);
+    });
+
+    it('should limit using the `id` value', function (done) {
+      var app = koa();
+
+      app.use(ratelimit({
+        db: db,
+        max: 1,
+        id: function (ctx) {
+          return ctx.request.header.foo;
         }
       }));
 
       app.use(function* (next) {
-        this.body = goodBody + guard;
+        this.body = this.request.header.foo;
       });
 
-      guard = 0;
-
-      setTimeout(function() {
-        request(app.listen())
-          .get('/')
-          .expect(200, goodBody + "1")
-          .expect(routeHitTimes(1))
-          .end(done);
-      }, rateLimitDuration);
-    });
-
-    it('should not limit when different ids', function (done) {
       request(app.listen())
         .get('/')
-        .expect(200, goodBody + "2")
-        .expect(routeHitTimes(2))
-        .end(done);
+        .set('foo', 'bar')
+        .expect(200, 'bar')
+        .end(function() {
+          request(app.listen())
+            .get('/')
+            .set('foo', 'biz')
+            .expect(200, 'biz')
+            .end(done);
+        });
     });
   });
 });

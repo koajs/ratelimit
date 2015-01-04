@@ -31,7 +31,9 @@ function ratelimit(opts) {
   opts = opts || {};
 
   return function *(next){
-    var id = (opts.id && opts.id(this)) || this.ip;
+    var id = opts.id ? opts.id(this) : this.ip;
+
+    if (false === id) return yield* next;
 
     // initialize limiter
     var limiter = new Limiter({ id: id, __proto__: opts });
