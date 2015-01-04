@@ -11,6 +11,14 @@ describe('ratelimit middleware', function() {
   var rateLimitDuration = 1000;
   var goodBody = "Num times hit: ";
 
+  before(function(done) {
+    db.keys('limit:*', function(err, rows) {
+      rows.forEach(db.del, db);
+    });
+
+    done();
+  });
+
   describe('limit', function() {
     var guard;
     var app;
