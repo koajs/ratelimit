@@ -5,7 +5,6 @@
 
 var debug = require('debug')('koa-ratelimit');
 var Limiter = require('ratelimiter');
-var ms = require('ms');
 var thenify = require('thenify');
 
 /**
@@ -29,6 +28,7 @@ module.exports = ratelimit;
 
 function ratelimit(opts) {
   opts = opts || {};
+  var errorMessage = opts.errorMessage || 'Rate limit exceeded';
 
   return function *(next){
     var id = opts.id ? opts.id(this) : this.ip;
@@ -53,10 +53,9 @@ function ratelimit(opts) {
     debug('remaining %s/%s %s', remaining, limit.total, id);
     if (limit.remaining) return yield* next;
 
-    var delta = (limit.reset * 1000) - Date.now() | 0;
     var after = limit.reset - (Date.now() / 1000) | 0;
     this.set('Retry-After', after);
     this.status = 429;
-    this.body = 'Rate limit exceeded, retry in ' + ms(delta, { long: true });
+    this.body = errorMessage;
   }
 }
