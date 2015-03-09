@@ -15,7 +15,6 @@
   ],
   "dependencies": {
     "debug": "^2.1.1",
-    "ms": "^0.7.0",
     "ratelimiter": "^2.0.0",
     "thenify": "^3.0.0"
   },
