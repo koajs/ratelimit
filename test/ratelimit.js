@@ -71,6 +71,29 @@ describe('ratelimit middleware', function() {
     });
   });
 
+
+  describe('errorMessage', function (done) {
+    it('should allow specifying a custom `errorMessage`', function (done) {
+      var app = koa();
+      var message = 'Rate limited';
+
+      app.use(ratelimit({
+        db: db,
+        max: 0,
+        errorMessage: { error: message }
+      }));
+
+
+      request(app.listen())
+        .get('/')
+        .expect(429)
+        .expect( function( res ) {
+          res.body.error.should.be.equal( message );
+        } )
+        .end(done);
+    });
+  });
+
   describe('id', function (done) {
     it('should allow specifying a custom `id` function', function (done) {
       var app = koa();
