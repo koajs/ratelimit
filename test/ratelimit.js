@@ -71,6 +71,58 @@ describe('ratelimit middleware', function() {
     });
   });
 
+  describe('limit with throw', function() {
+    var guard;
+    var app;
+
+    var routeHitOnlyOnce = function() {
+      guard.should.be.equal(1);
+    };
+
+    beforeEach(function(done) {
+      app = koa();
+
+      app.use(function *(next) {
+        try {
+          yield* next;
+        } catch (e) {
+          this.body = e.message;
+          this.set(e.headers);
+        }
+      });
+
+      app.use(ratelimit({
+        duration: rateLimitDuration,
+        db: db,
+        max: 1,
+        throw: true
+      }));
+
+      app.use(function* (next) {
+        guard++;
+        this.body = goodBody + guard;
+      });
+
+      guard = 0;
+
+      setTimeout(function() {
+        request(app.listen())
+          .get('/')
+          .expect(200, goodBody + "1")
+          .expect(routeHitOnlyOnce)
+          .end(done);
+      }, rateLimitDuration);
+    });
+
+    it('responds with 429 when rate limit is exceeded', function(done) {
+      request(app.listen())
+        .get('/')
+        .expect('X-RateLimit-Remaining', 0)
+        .expect(429)
+        .end(done);
+    });
+  });
+
   describe('id', function (done) {
     it('should allow specifying a custom `id` function', function (done) {
       var app = koa();
