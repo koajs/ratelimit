@@ -1,21 +1,20 @@
 
-var ratelimit = require('./');
-var redis = require('redis');
-var koa = require('koa');
-var app = koa();
+import rateLimit from './src';
+import redis from 'redis';
+import Koa from 'koa';
+
+const app = new Koa();
 
 // apply rate limit
-
-app.use(ratelimit({
+app.use(rateLimit({
   db: redis.createClient(),
   duration: 60000,
-  max: 100
+  max: 5
 }));
 
 // response middleware
-
-app.use(function *(){
-  this.body = 'Stuff!';
+app.use(ctx => {
+  ctx.body = 'Stuff!';
 });
 
 app.listen(4000);
