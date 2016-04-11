@@ -1,4 +1,10 @@
 
+2.2.0 / 2016-04-11
+==================
+
+  * Add option to throw error instead of setting body
+  * bump deps
+
 2.1.0 / 2015-01-04
 ==================
 
