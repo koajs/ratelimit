@@ -192,4 +192,29 @@ describe('ratelimit middleware', function() {
         });
     });
   });
+
+  describe('custom headers', function() {
+    it('should allow specifying a custom header names', function(done) {
+      var app = koa();
+
+      app.use(ratelimit({
+        db: db,
+        max: 1,
+        headers: {
+          remaining: 'Rate-Limit-Remaining',
+          reset: 'Rate-Limit-Reset',
+          total: 'Rate-Limit-Total'
+        }
+      }));
+
+      request(app.listen())
+        .get('/')
+        .set('foo', 'bar')
+        .expect(function(res) {
+          res.headers.should.containEql('rate-limit-remaining', 'rate-limit-reset', 'rate-limit-total');
+          res.headers.should.not.containEql('x-ratelimit-limit', 'x-ratelimit-remaining', 'x-ratelimit-reset');
+        })
+        .end(done);
+    });
+  });
 });
