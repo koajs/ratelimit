@@ -36,6 +36,11 @@ app.use(ratelimit({
   max: 100,
   id: function (context) {
     return context.ip;
+  },
+  headers: {
+    remaining: 'Rate-Limit-Remaining',
+    reset: 'Rate-Limit-Reset',
+    total: 'Rate-Limit-Total'
   }
 }));
 
@@ -55,6 +60,10 @@ console.log('listening on port 3000');
  - `max` max requests within `duration` [2500]
  - `duration` of limit in milliseconds [3600000]
  - `id` id to compare requests [ip]
+ - `headers` custom header names
+  - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
+  - `reset` reset timestamp [`'X-RateLimit-Reset'`]
+  - `total` total number of requests [`'X-RateLimit-Limit'`]
 
 ## Responses
 

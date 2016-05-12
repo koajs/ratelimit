@@ -21,6 +21,10 @@ module.exports = ratelimit;
  * - `max` max requests per `id` [2500]
  * - `db` database connection
  * - `id` id to compare requests [ip]
+ * - `headers` custom header names
+ *  - `remaining` remaining number of requests ['X-RateLimit-Remaining']
+ *  - `reset` reset timestamp ['X-RateLimit-Reset']
+ *  - `total` total number of requests ['X-RateLimit-Limit']
  *
  * @param {Object} opts
  * @return {Function}
@@ -29,6 +33,10 @@ module.exports = ratelimit;
 
 function ratelimit(opts) {
   opts = opts || {};
+  opts.headers = opts.headers || {};
+  opts.headers.remaining = opts.headers.remaining || 'X-RateLimit-Remaining';
+  opts.headers.reset = opts.headers.reset || 'X-RateLimit-Reset';
+  opts.headers.total = opts.headers.total || 'X-RateLimit-Limit';
 
   return function *(next){
     var id = opts.id ? opts.id(this) : this.ip;
@@ -46,11 +54,10 @@ function ratelimit(opts) {
     var remaining = limit.remaining > 0 ? limit.remaining - 1 : 0;
 
     // header fields
-    var headers = {
-      'X-RateLimit-Limit': limit.total,
-      'X-RateLimit-Remaining': remaining,
-      'X-RateLimit-Reset': limit.reset
-    };
+    var headers = {};
+    headers[opts.headers.remaining] = remaining;
+    headers[opts.headers.reset] = limit.reset;
+    headers[opts.headers.total] = limit.total;
 
     this.set(headers);
 
