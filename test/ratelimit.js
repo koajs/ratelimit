@@ -193,6 +193,27 @@ describe('ratelimit middleware', function() {
     });
   });
 
+  describe('errorMsg', function (done) {
+    it('should allow using a custom error body message using the `errorMsg` value', function (done) {
+      var app = koa();
+
+      app.use(ratelimit({
+        db: db,
+        max: 1,
+        errorMsg: 'Exceeded limit, retry in '
+      }));
+
+      request(app.listen())
+        .get('/')
+        .expect(429)
+        .expect(function(res) {
+          res.text.should.startWith('Exceeded limit, retry in');
+          res.text.should.not.startWith('Rate limit exceeded, retry in');
+        })
+        .end(done);
+    });
+  });
+  
   describe('custom headers', function() {
     it('should allow specifying a custom header names', function(done) {
       var app = koa();

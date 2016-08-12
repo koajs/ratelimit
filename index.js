@@ -37,6 +37,9 @@ function ratelimit(opts) {
   opts.headers.remaining = opts.headers.remaining || 'X-RateLimit-Remaining';
   opts.headers.reset = opts.headers.reset || 'X-RateLimit-Reset';
   opts.headers.total = opts.headers.total || 'X-RateLimit-Limit';
+  opts.errorMsg = opts.errorMsg || 'Rate limit exceeded, retry in ';
+  opts.appendRetryTime = opts.appendRetryTime || true;
+  opts.throw = opts.throw || false;
 
   return function *(next){
     var id = opts.id ? opts.id(this) : this.ip;
@@ -69,7 +72,7 @@ function ratelimit(opts) {
     this.set('Retry-After', after);
 
     this.status = 429;
-    this.body = 'Rate limit exceeded, retry in ' + ms(delta, { long: true });
+    this.body = opts.errorMsg + (opts.appendRetryTime ? ms(delta, { long: true }) : '');
 
     if (opts.throw) {
       this.throw(this.status, this.body, { headers: headers });
