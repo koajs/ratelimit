@@ -221,12 +221,12 @@ describe('ratelimit middleware', function() {
   describe('custom error message', function() {
     it('should allow specifying a custom error message', function(done) {
       var app = koa();
-      var errMessage = 'Sometimes You Just Have to Slow Down.'
+      var errorMessage = 'Sometimes You Just Have to Slow Down.'
 
       app.use(ratelimit({
         db: db,
         max: 1,
-        errMessage,
+        errorMessage,
       }));
 
       request(app.listen())
@@ -239,7 +239,7 @@ describe('ratelimit middleware', function() {
             .set('foo', 'bar')
             .expect(429)
             .expect(function(res) {
-              res.text.should.equal(errMessage)
+              res.text.should.equal(errorMessage)
             })
             .end(done);
         })
