@@ -41,7 +41,8 @@ app.use(ratelimit({
     remaining: 'Rate-Limit-Remaining',
     reset: 'Rate-Limit-Reset',
     total: 'Rate-Limit-Total'
-  }
+  },
+  errorMessage: 'Sometimes You Just Have to Slow Down.'
 }));
 
 // response middleware
@@ -64,6 +65,7 @@ console.log('listening on port 3000');
   - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
   - `reset` reset timestamp [`'X-RateLimit-Reset'`]
   - `total` total number of requests [`'X-RateLimit-Limit'`]
+ - `errorMessage` custom error message
 
 ## Responses
 
