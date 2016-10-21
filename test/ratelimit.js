@@ -217,4 +217,56 @@ describe('ratelimit middleware', function() {
         .end(done);
     });
   });
+
+  describe('custom error message', function() {
+    it('should allow specifying a custom error message', function(done) {
+      var app = koa();
+      var errMessage = 'Sometimes You Just Have to Slow Down.'
+
+      app.use(ratelimit({
+        db: db,
+        max: 1,
+        errMessage,
+      }));
+
+      request(app.listen())
+        .get('/')
+        .set('foo', 'bar')
+        .expect(200)
+        .end(function(){
+          request(app.listen())
+            .get('/')
+            .set('foo', 'bar')
+            .expect(429)
+            .expect(function(res) {
+              res.text.should.equal(errMessage)
+            })
+            .end(done);
+        })
+    });
+
+    it('should return default error message when not specifying', function(done) {
+      var app = koa();
+
+      app.use(ratelimit({
+        db: db,
+        max: 1,
+      }));
+
+      request(app.listen())
+        .get('/')
+        .set('foo', 'bar')
+        .expect(200)
+        .end(function(){
+          request(app.listen())
+            .get('/')
+            .set('foo', 'bar')
+            .expect(429)
+            .expect(function(res) {
+              res.text.should.match(/Rate limit exceeded, retry in \d+ ms./)
+            })
+            .end(done);
+        })
+    });
+  });
 });
