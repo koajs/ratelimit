@@ -67,10 +67,10 @@ function ratelimit(opts) {
     var delta = (limit.reset * 1000) - Date.now() | 0;
     var after = limit.reset - (Date.now() / 1000) | 0;
     this.set('Retry-After', after);
-    
-    this.status = 429;
-    this.body = opts.errMessage || 'Rate limit exceeded, retry in ' + ms(delta, { long: true }) + '.';
 
+    this.status = 429;
+    this.body = opts.errorMessage || 'Rate limit exceeded, retry in ' + ms(delta, { long: true }) + '.';
+    
     if (opts.throw) {
       this.throw(this.status, this.body, { headers: headers });
     }
