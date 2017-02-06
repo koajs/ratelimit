@@ -231,7 +231,6 @@ describe('ratelimit middleware', function() {
 
       request(app.listen())
         .get('/')
-        .expect(200)
         .end(function() {
           request(app.listen())
             .get('/')
@@ -253,14 +252,13 @@ describe('ratelimit middleware', function() {
 
       request(app.listen())
         .get('/')
-        .expect(200)
         .end(function() {
           request(app.listen())
             .get('/')
             .set('foo', 'bar')
             .expect(429)
             .expect(function(res) {
-              res.text.should.match(/Rate limit exceeded, retry in \d+ ms./);
+              res.text.should.match(/Rate limit exceeded, retry in \d+/);
             })
             .end(done);
         })
