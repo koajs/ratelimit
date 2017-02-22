@@ -20,6 +20,7 @@ module.exports = ratelimit;
  * - `duration` limit duration in milliseconds [1 hour]
  * - `max` max requests per `id` [2500]
  * - `db` database connection
+ * - `shouldRunFn` determine if middleware should be run for this request [true]
  * - `id` id to compare requests [ip]
  * - `headers` custom header names
  *  - `remaining` remaining number of requests ['X-RateLimit-Remaining']
@@ -39,8 +40,10 @@ function ratelimit(opts) {
   opts.headers.total = opts.headers.total || 'X-RateLimit-Limit';
 
   return function *(next){
-    var id = opts.id ? opts.id(this) : this.ip;
+    var shouldRun = opts.shouldRunFn ? opts.shouldRunFn(this) : true;
+    if (false === shouldRun) return yield* next;
 
+    var id = opts.id ? opts.id(this) : this.ip;
     if (false === id) return yield* next;
 
     // initialize limiter

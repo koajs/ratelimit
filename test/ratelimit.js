@@ -266,4 +266,39 @@ describe('ratelimit middleware', function() {
         })
     });
   });
+
+  describe('shouldRunFn', function() {
+    it('will skip invoking ratelimit if shouldRunFn results in false', function(done) {
+      var app = koa();
+
+      app.use(function* (next) {
+        this.superuser = true;
+        yield* next;
+      });
+
+      app.use(ratelimit({
+        db: db,
+        max: 1,
+        shouldRunFn: function(ctx) { return !ctx.superuser; },
+      }));
+
+      app.use(function* (next) {
+        this.status = 200;
+        this.body = 'test';
+      });
+
+      request(app.listen())
+        .get('/')
+        .expect(200)
+        .end(function() {
+          request(app.listen())
+            .get('/')
+            .set('foo', 'bar')
+            .expect(200)
+            .expect('test')
+            .end(done);
+        })
+
+    });
+  });
 });
