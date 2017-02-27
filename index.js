@@ -3,10 +3,9 @@
  * Module dependencies.
  */
 
-var debug = require('debug')('koa-ratelimit');
-var Limiter = require('ratelimiter');
-var ms = require('ms');
-var thenify = require('thenify');
+const debug = require('debug')('koa-ratelimit');
+const Limiter = require('ratelimiter');
+const ms = require('ms');
 
 /**
  * Expose `ratelimit()`.
@@ -31,48 +30,63 @@ module.exports = ratelimit;
  * @api public
  */
 
-function ratelimit(opts) {
-  opts = opts || {};
-  opts.headers = opts.headers || {};
-  opts.headers.remaining = opts.headers.remaining || 'X-RateLimit-Remaining';
-  opts.headers.reset = opts.headers.reset || 'X-RateLimit-Reset';
-  opts.headers.total = opts.headers.total || 'X-RateLimit-Limit';
+function ratelimit(opts = {}) {
+  const {
+    remaining = 'X-RateLimit-Remaining',
+    reset = 'X-RateLimit-Reset',
+    total = 'X-RateLimit-Limit'
+  } = opts.headers || {}
 
-  return function *(next){
-    var id = opts.id ? opts.id(this) : this.ip;
+  return async function ratelimit(ctx, next) {
+    const id = opts.id ? opts.id(ctx) : ctx.ip;
 
-    if (false === id) return yield* next;
+    if (false === id) return await next();
 
     // initialize limiter
-    var limiter = new Limiter({ id: id, __proto__: opts });
-    limiter.get = thenify(limiter.get);
+    const limiter = new Limiter(Object.assign({}, opts, { id }));
 
     // check limit
-    var limit = yield limiter.get();
+    const limit = await thenify(limiter.get.bind(limiter));
 
     // check if current call is legit
-    var remaining = limit.remaining > 0 ? limit.remaining - 1 : 0;
+    const calls = limit.remaining > 0 ? limit.remaining - 1 : 0;
 
     // header fields
-    var headers = {};
-    headers[opts.headers.remaining] = remaining;
-    headers[opts.headers.reset] = limit.reset;
-    headers[opts.headers.total] = limit.total;
+    const headers = {
+      [remaining]: calls,
+      [reset]: limit.reset,
+      [total]: limit.total
+    };
 
-    this.set(headers);
+    ctx.set(headers);
 
     debug('remaining %s/%s %s', remaining, limit.total, id);
-    if (limit.remaining) return yield* next;
+    if (limit.remaining) return await next();
 
-    var delta = (limit.reset * 1000) - Date.now() | 0;
-    var after = limit.reset - (Date.now() / 1000) | 0;
-    this.set('Retry-After', after);
+    const delta = (limit.reset * 1000) - Date.now() | 0;
+    const after = limit.reset - (Date.now() / 1000) | 0;
+    ctx.set('Retry-After', after);
 
-    this.status = 429;
-    this.body = opts.errorMessage || 'Rate limit exceeded, retry in ' + ms(delta, { long: true }) + '.';
+    ctx.status = 429;
+    ctx.body = opts.errorMessage || `Rate limit exceeded, retry in ${ms(delta, { long: true })}.`;
 
     if (opts.throw) {
-      this.throw(this.status, this.body, { headers: headers });
+      ctx.throw(ctx.status, ctx.body, { headers: headers });
     }
   }
+}
+
+/**
+ * Helper function to convert a callback to a Promise.
+ */
+
+async function thenify(fn) {
+  return await new Promise(function(resolve, reject) {
+    function callback(err, res) {
+      if (err) return reject(err);
+      return resolve(res);
+    }
+
+    fn(callback);
+  });
 }
