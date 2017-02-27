@@ -23,32 +23,30 @@ $ npm install koa-ratelimit
 ## Example
 
 ```js
-var ratelimit = require('koa-ratelimit');
-var redis = require('redis');
-var koa = require('koa');
-var app = koa();
+const Koa = require('koa');
+const ratelimit = require('koa-ratelimit');
+const redis = require('ioredis');
+const app = new Koa();
 
 // apply rate limit
 
 app.use(ratelimit({
-  db: redis.createClient(),
+  db: new Redis(),
   duration: 60000,
-  max: 100,
-  id: function (context) {
-    return context.ip;
-  },
+  errorMessage: 'Sometimes You Just Have to Slow Down.',
+  id: (ctx) => ctx.ip,
   headers: {
     remaining: 'Rate-Limit-Remaining',
     reset: 'Rate-Limit-Reset',
     total: 'Rate-Limit-Total'
   },
-  errorMessage: 'Sometimes You Just Have to Slow Down.'
+  max: 100
 }));
 
 // response middleware
 
-app.use(function *(){
-  this.body = 'Stuff!';
+app.use(async (ctx) => {
+  ctx.body = 'Stuff!';
 });
 
 app.listen(3000);
@@ -58,18 +56,18 @@ console.log('listening on port 3000');
 ## Options
 
  - `db` redis connection instance
- - `max` max requests within `duration` [2500]
  - `duration` of limit in milliseconds [3600000]
+ - `errorMessage` custom error message
  - `id` id to compare requests [ip]
  - `headers` custom header names
+ - `max` max requests within `duration` [2500]
   - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
   - `reset` reset timestamp [`'X-RateLimit-Reset'`]
   - `total` total number of requests [`'X-RateLimit-Limit'`]
- - `errorMessage` custom error message
 
 ## Responses
 
-  Example 200 with header fields:
+ Example 200 with header fields:
 
 ```
 HTTP/1.1 200 OK
@@ -85,7 +83,7 @@ Connection: keep-alive
 Stuff!
 ```
 
-  Example 429 response:
+ Example 429 response:
 
 ```
 HTTP/1.1 429 Too Many Requests
@@ -104,4 +102,4 @@ Rate limit exceeded, retry in 8 seconds
 
 ## License
 
-  MIT
+ MIT

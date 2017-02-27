@@ -20,17 +20,17 @@
     "thenify": "^3.2.0"
   },
   "devDependencies": {
-    "koa": "^1.2.0",
-    "mocha": "^2.4.5",
-    "redis": "^2.6.0-1",
-    "should": "^8.3.0",
-    "supertest": "^1.2.0"
+    "koa": "^2.0.1",
+    "mocha": "^3.2.0",
+    "ioredis": "^3.0.0-0",
+    "should": "^11.2.0",
+    "supertest": "^3.0.0"
   },
   "scripts": {
     "test": "NODE_ENV=test mocha --reporter spec"
   },
   "engines": {
-    "node": ">= 0.11.13"
+    "node": ">= 7"
   },
   "license": "MIT"
 }
