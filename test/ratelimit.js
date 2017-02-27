@@ -1,269 +1,235 @@
 
-var request = require('supertest');
-var should = require('should');
-var redis = require('redis');
-var koa = require('koa');
+const Koa = require('koa');
+const Redis = require('ioredis');
+const request = require('supertest');
+const should = require('should');
 
-var ratelimit = require('..');
+const ratelimit = require('..');
+const db = new Redis();
 
-var db = redis.createClient();
+describe('ratelimit middleware', () => {
+  const duration = 1000;
+  const goodBody = 'Num times hit:';
 
-describe('ratelimit middleware', function() {
-  var rateLimitDuration = 1000;
-  var goodBody = "Num times hit: ";
+  beforeEach(async () => await db.eval(`for i, name in ipairs(redis.call('KEYS', 'limit:*')) do redis.call('DEL', name); end`, 0));
 
-  before(function(done) {
-    db.keys('limit:*', function(err, rows) {
-      rows.forEach(db.del, db);
-    });
+  describe('limit', () => {
+    let guard;
+    let app;
 
-    done();
-  });
+    const hitOnce = () => guard.should.equal(1);
 
-  describe('limit', function() {
-    var guard;
-    var app;
+    beforeEach(async () => {
+      app = new Koa();
 
-    var routeHitOnlyOnce = function() {
-      guard.should.be.equal(1);
-    };
-
-    beforeEach(function(done) {
-      app = koa();
-
-      app.use(ratelimit({
-        duration: rateLimitDuration,
-        db: db,
-        max: 1
-      }));
-
-      app.use(function* (next) {
+      app.use(ratelimit({ duration, db, max: 1 }));
+      app.use(async (ctx) => {
         guard++;
-        this.body = goodBody + guard;
+        ctx.body = `${goodBody} ${guard}`;
       });
 
       guard = 0;
 
-      setTimeout(function() {
-        request(app.listen())
-          .get('/')
-          .expect(200, goodBody + "1")
-          .expect(routeHitOnlyOnce)
-          .end(done);
-      }, rateLimitDuration);
+      await sleep(duration);
+      await request(app.listen())
+        .get('/')
+        .expect(200, `${goodBody} 1`)
+        .expect(hitOnce)
     });
 
-    it('responds with 429 when rate limit is exceeded', function(done) {
-      request(app.listen())
+    it('responds with 429 when rate limit is exceeded', async () => {
+      await request(app.listen())
         .get('/')
-        .expect('X-RateLimit-Remaining', 0)
-        .expect(429)
-        .end(done);
+        .expect('X-RateLimit-Remaining', '0')
+        .expect(429);
     });
 
-    it('should not yield downstream if ratelimit is exceeded', function(done) {
-      request(app.listen())
+    it('should not yield downstream if ratelimit is exceeded', async () => {
+      await request(app.listen())
         .get('/')
         .expect(429)
-        .end(function() {
-          routeHitOnlyOnce();
-          done();
-        });
+
+      hitOnce();
     });
   });
 
-  describe('limit with throw', function() {
-    var guard;
-    var app;
+  describe('limit with throw', () => {
+    let guard;
+    let app;
 
-    var routeHitOnlyOnce = function() {
-      guard.should.be.equal(1);
-    };
+    const hitOnce = () => guard.should.equal(1);
 
-    beforeEach(function(done) {
-      app = koa();
+    beforeEach(async () => {
+      app = new Koa();
 
-      app.use(function *(next) {
+      app.use(async (ctx, next) => {
         try {
-          yield* next;
+          await next();
         } catch (e) {
-          this.body = e.message;
-          this.set(e.headers);
+          ctx.body = e.message;
+          ctx.set(Object.assign({ 'X-Custom': 'foobar' }, e.headers));
         }
       });
 
       app.use(ratelimit({
-        duration: rateLimitDuration,
-        db: db,
+        db,
+        duration,
         max: 1,
         throw: true
       }));
 
-      app.use(function* (next) {
+      app.use(async (ctx) => {
         guard++;
-        this.body = goodBody + guard;
+        ctx.body = `${goodBody} ${guard}`;
       });
 
       guard = 0;
 
-      setTimeout(function() {
-        request(app.listen())
-          .get('/')
-          .expect(200, goodBody + "1")
-          .expect(routeHitOnlyOnce)
-          .end(done);
-      }, rateLimitDuration);
+      await sleep(duration);
+      await request(app.listen())
+        .get('/')
+        .expect(200, `${goodBody} 1`)
+        .expect(hitOnce);
     });
 
-    it('responds with 429 when rate limit is exceeded', function(done) {
-      request(app.listen())
+    it('responds with 429 when rate limit is exceeded', async () => {
+      await request(app.listen())
         .get('/')
-        .expect('X-RateLimit-Remaining', 0)
+        .expect('X-Custom', 'foobar')
+        .expect('X-RateLimit-Remaining', '0')
         .expect(429)
-        .end(done);
     });
   });
 
-  describe('id', function (done) {
-    it('should allow specifying a custom `id` function', function (done) {
-      var app = koa();
+  describe('id', async () => {
+    it('should allow specifying a custom `id` function', async () => {
+      const app = new Koa();
 
       app.use(ratelimit({
-        db: db,
-        max: 1,
-        id: function (ctx) {
-          return ctx.request.header.foo;
-        }
+        db,
+        id: (ctx) => ctx.request.header.foo,
+        max: 1
       }));
 
-      request(app.listen())
+      await request(app.listen())
         .get('/')
         .set('foo', 'bar')
-        .expect(function(res) {
-          res.header['x-ratelimit-remaining'].should.equal('0');
-        })
-        .end(done);
+        .expect('X-RateLimit-Remaining', '0');
     });
 
-    it('should not limit if `id` returns `false`', function (done) {
-      var app = koa();
+    it('should not limit if `id` returns `false`', async () => {
+      const app = new Koa();
 
       app.use(ratelimit({
-        db: db,
-        id: function (ctx) {
-          return false;
-        },
+        db,
+        id: (ctx) => false,
         max: 5
       }));
 
-      request(app.listen())
+      await request(app.listen())
         .get('/')
-        .expect(function(res) {
-          res.header.should.not.have.property('x-ratelimit-remaining');
-        })
-        .end(done);
+        .expect((res) => res.header.should.not.have.property('x-ratelimit-remaining'))
     });
 
-    it('should limit using the `id` value', function (done) {
-      var app = koa();
+    it('should limit using the `id` value', async () => {
+      const app = new Koa();
 
       app.use(ratelimit({
-        db: db,
-        max: 1,
-        id: function (ctx) {
-          return ctx.request.header.foo;
-        }
+        db,
+        id: (ctx) => ctx.request.header.foo,
+        max: 1
       }));
 
-      app.use(function* (next) {
-        this.body = this.request.header.foo;
+      app.use(async (ctx) => {
+        ctx.body = ctx.request.header.foo;
       });
 
-      request(app.listen())
+      await request(app.listen())
         .get('/')
-        .set('foo', 'bar')
-        .expect(200, 'bar')
-        .end(function() {
-          request(app.listen())
-            .get('/')
-            .set('foo', 'biz')
-            .expect(200, 'biz')
-            .end(done);
-        });
+        .set('foo', 'fiz')
+        .expect(200, 'fiz');
+
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'biz')
+        .expect(200, 'biz');
     });
   });
 
-  describe('custom headers', function() {
-    it('should allow specifying a custom header names', function(done) {
-      var app = koa();
+  describe('custom headers', () => {
+    it('should allow specifying custom header names', async () => {
+      const app = new Koa();
 
       app.use(ratelimit({
-        db: db,
-        max: 1,
+        db,
         headers: {
           remaining: 'Rate-Limit-Remaining',
           reset: 'Rate-Limit-Reset',
           total: 'Rate-Limit-Total'
-        }
+        },
+        max: 1
       }));
 
-      request(app.listen())
+      await request(app.listen())
         .get('/')
         .set('foo', 'bar')
-        .expect(function(res) {
-          res.headers.should.containEql('rate-limit-remaining', 'rate-limit-reset', 'rate-limit-total');
-          res.headers.should.not.containEql('x-ratelimit-limit', 'x-ratelimit-remaining', 'x-ratelimit-reset');
-        })
-        .end(done);
+        .expect((res) => {
+          res.headers.should.have.keys('rate-limit-remaining', 'rate-limit-reset', 'rate-limit-total');
+          res.headers.should.not.have.keys('x-ratelimit-limit', 'x-ratelimit-remaining', 'x-ratelimit-reset');
+        });
     });
   });
 
-  describe('custom error message', function() {
-    it('should allow specifying a custom error message', function(done) {
-      var app = koa();
-      var errorMessage = 'Sometimes You Just Have to Slow Down.';
+  describe('custom error message', async () => {
+    it('should allow specifying a custom error message', async () => {
+      const app = new Koa();
+      const errorMessage = 'Sometimes You Just Have to Slow Down.';
 
       app.use(ratelimit({
-        db: db,
-        max: 1,
+        db,
         errorMessage,
+        max: 1
       }));
 
-      request(app.listen())
+      app.use(async (ctx) => {
+        ctx.body = 'foo';
+      });
+
+      await request(app.listen())
         .get('/')
-        .expect(200)
-        .end(function() {
-          request(app.listen())
-            .get('/')
-            .expect(429)
-            .expect(function(res) {
-              res.text.should.equal(errorMessage);
-            })
-            .end(done);
-        })
+        .expect(200);
+
+      await request(app.listen())
+        .get('/')
+        .expect(429)
+        .expect(errorMessage);
     });
 
-    it('should return default error message when not specifying', function(done) {
-      var app = koa();
+    it('should return default error message when not specifying', async () => {
+      const app = new Koa();
 
       app.use(ratelimit({
-        db: db,
+        db,
         max: 1,
       }));
 
-      request(app.listen())
+      app.use(async (ctx) => {
+        ctx.body = 'foo';
+      });
+
+      await request(app.listen())
         .get('/')
         .expect(200)
-        .end(function() {
-          request(app.listen())
-            .get('/')
-            .set('foo', 'bar')
-            .expect(429)
-            .expect(function(res) {
-              res.text.should.match(/Rate limit exceeded, retry in \d+ ms./);
-            })
-            .end(done);
-        })
+
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'bar')
+        .expect(429)
+        .expect((res) => res.text.should.match(/Rate limit exceeded, retry in \d+ minutes\./));
     });
   });
 });
+
+async function sleep(ms) {
+ await new Promise((resolve, reject) => setTimeout(resolve, ms));
+}
