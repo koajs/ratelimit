@@ -260,7 +260,7 @@ describe('ratelimit middleware', function() {
             .set('foo', 'bar')
             .expect(429)
             .expect(function(res) {
-              res.text.should.match(/Rate limit exceeded, retry in \d+ ms./);
+              res.text.should.match(/Rate limit exceeded, retry in \d+ seconds./);
             })
             .end(done);
         })
