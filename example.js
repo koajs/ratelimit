@@ -1,20 +1,20 @@
 
-var Koa = require('koa');
-var ratelimit = require('./');
-var redis = require('ioredis');
-var app = new Koa();
+const Koa = require('koa');
+const ratelimit = require('./');
+const Redis = require('ioredis');
+const app = new Koa();
 
 // apply rate limit
 
 app.use(ratelimit({
   db: new Redis(),
   duration: 60000,
-  max: 100
+  max: 10
 }));
 
 // response middleware
 
-app.use(async function(ctx) {
+app.use(async (ctx) => {
   ctx.body = 'Stuff!';
 });
 
