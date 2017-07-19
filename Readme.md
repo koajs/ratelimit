@@ -9,7 +9,7 @@
 [npm-url]: https://npmjs.org/package/koa-ratelimit
 [travis-image]: https://img.shields.io/travis/koajs/ratelimit.svg?style=flat-square
 [travis-url]: https://travis-ci.org/koajs/ratelimit
-[node-image]: https://img.shields.io/badge/node.js-%3E=_0.11-red.svg?style=flat-square
+[node-image]: https://img.shields.io/badge/node.js-%3E=_7.6-red.svg?style=flat-square
 [node-url]: http://nodejs.org/download/
 
  Rate limiter middleware for koa.
