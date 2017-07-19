@@ -25,7 +25,7 @@ $ npm install koa-ratelimit
 ```js
 const Koa = require('koa');
 const ratelimit = require('koa-ratelimit');
-const redis = require('ioredis');
+const Redis = require('ioredis');
 const app = new Koa();
 
 // apply rate limit
