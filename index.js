@@ -51,14 +51,19 @@ function ratelimit(opts = {}) {
     // check if current call is legit
     const calls = limit.remaining > 0 ? limit.remaining - 1 : 0;
 
-    // header fields
-    const headers = {
-      [remaining]: calls,
-      [reset]: limit.reset,
-      [total]: limit.total
-    };
+    // check if header disabled
+    const disableHeader = opts.disableHeader || false;
 
-    ctx.set(headers);
+    if (!disableHeader) {
+      // header fields
+      const headers = {
+        [remaining]: calls,
+        [reset]: limit.reset,
+        [total]: limit.total
+      };
+
+      ctx.set(headers);
+    }
 
     debug('remaining %s/%s %s', remaining, limit.total, id);
     if (limit.remaining) return await next();
