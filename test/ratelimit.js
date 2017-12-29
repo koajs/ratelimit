@@ -228,6 +228,31 @@ describe('ratelimit middleware', () => {
         .expect((res) => res.text.should.match(/Rate limit exceeded, retry in \d+ minutes\./));
     });
   });
+
+  describe('disable headers', () => {
+    it('should disable headers when set opts.disableHeader', async () => {
+      const app = new Koa();
+
+      app.use(ratelimit({
+        db,
+        headers: {
+          remaining: 'Rate-Limit-Remaining',
+          reset: 'Rate-Limit-Reset',
+          total: 'Rate-Limit-Total'
+        },
+        disableHeader: true,
+        max: 1
+      }));
+
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'bar')
+        .expect((res) => {
+          res.headers.should.not.have.keys('rate-limit-remaining', 'rate-limit-reset', 'rate-limit-total');
+          res.headers.should.not.have.keys('x-ratelimit-limit', 'x-ratelimit-remaining', 'x-ratelimit-reset');
+        });
+    });
+  });
 });
 
 async function sleep(ms) {
