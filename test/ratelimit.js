@@ -225,7 +225,7 @@ describe('ratelimit middleware', () => {
         .get('/')
         .set('foo', 'bar')
         .expect(429)
-        .expect((res) => res.text.should.match(/Rate limit exceeded, retry in \d+ seconds\./));
+        .expect((res) => res.text.should.match(/Rate limit exceeded, retry in \d+ minutes\./));
     });
   });
 });
