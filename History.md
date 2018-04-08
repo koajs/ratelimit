@@ -1,4 +1,10 @@
 
+4.1.0 / 2018-04-08
+==================
+
+  * fix test error for custom error message
+  * add opts.disableHeader support
+
 4.0.0 / 2017-03-12
 ==================
 
