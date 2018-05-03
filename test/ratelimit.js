@@ -97,6 +97,7 @@ describe('ratelimit middleware', () => {
         .get('/')
         .expect('X-Custom', 'foobar')
         .expect('X-RateLimit-Remaining', '0')
+        .expect((res) => res.error.text.should.match(/^Rate limit exceeded, retry in.*/))
         .expect(429)
     });
   });

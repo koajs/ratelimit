@@ -54,9 +54,10 @@ function ratelimit(opts = {}) {
     // check if header disabled
     const disableHeader = opts.disableHeader || false;
 
+    let headers;
     if (!disableHeader) {
       // header fields
-      const headers = {
+      headers = {
         [remaining]: calls,
         [reset]: limit.reset,
         [total]: limit.total
@@ -76,7 +77,7 @@ function ratelimit(opts = {}) {
     ctx.body = opts.errorMessage || `Rate limit exceeded, retry in ${ms(delta, { long: true })}.`;
 
     if (opts.throw) {
-      ctx.throw(ctx.status, ctx.body, { headers: headers });
+      ctx.throw(ctx.status, ctx.body, { headers });
     }
   }
 }
