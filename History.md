@@ -1,4 +1,10 @@
 
+4.1.1 / 2018-05-29
+==================
+
+  * bump deps
+  * throw correct error when rate limit exceeded (#36)
+
 4.1.0 / 2018-04-08
 ==================
 
