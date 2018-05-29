@@ -54,7 +54,7 @@ function ratelimit(opts = {}) {
     // check if header disabled
     const disableHeader = opts.disableHeader || false;
 
-    let headers;
+    let headers = {};
     if (!disableHeader) {
       // header fields
       headers = {
