@@ -16,8 +16,7 @@
   "dependencies": {
     "debug": "^3.1.0",
     "ms": "^2.1.1",
-    "ratelimiter": "^3.0.3",
-    "thenify": "^3.3.0"
+    "ratelimiter": "^3.0.3"
   },
   "devDependencies": {
     "ioredis": "^3.2.2",
