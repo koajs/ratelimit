@@ -24,6 +24,7 @@ module.exports = ratelimit;
  *  - `remaining` remaining number of requests ['X-RateLimit-Remaining']
  *  - `reset` reset timestamp ['X-RateLimit-Reset']
  *  - `total` total number of requests ['X-RateLimit-Limit']
+ * - `whitelist` whitelist function [false]
  *
  * @param {Object} opts
  * @return {Function}
@@ -39,8 +40,9 @@ function ratelimit(opts = {}) {
 
   return async function ratelimit(ctx, next) {
     const id = opts.id ? opts.id(ctx) : ctx.ip;
+    const whitelisted = typeof opts.whitelist === 'function' ? opts.whitelist(ctx) : false;
 
-    if (false === id) return await next();
+    if (false === id || true === whitelisted) return await next();
 
     // initialize limiter
     const limiter = new Limiter(Object.assign({}, opts, { id }));
