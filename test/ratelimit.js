@@ -206,6 +206,38 @@ describe('ratelimit middleware', () => {
     });
   })
 
+  describe('blacklist', () => {
+    let app;
+
+    beforeEach(async () => {
+      app = new Koa();
+
+      app.use(ratelimit({
+        db,
+        blacklist: (ctx) => ctx.request.header.foo === 'blacklisted',
+        max: 1
+      }));
+      app.use(async (ctx) => {
+        ctx.body = 'foo';
+      });
+
+    });
+
+    it('should throw 403 if blacklisted', async () => {
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'blacklisted')
+        .expect(403)
+    });
+
+    it('should return 200 when not blacklisted', async () => {
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'imnotblacklisted')
+        .expect(200)
+    });
+  })
+
   describe('custom headers', () => {
     it('should allow specifying custom header names', async () => {
       const app = new Koa();

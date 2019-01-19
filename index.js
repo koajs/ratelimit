@@ -25,6 +25,7 @@ module.exports = ratelimit;
  *  - `reset` reset timestamp ['X-RateLimit-Reset']
  *  - `total` total number of requests ['X-RateLimit-Limit']
  * - `whitelist` whitelist function [false]
+ * - `blacklist` blacklist function [false]
  *
  * @param {Object} opts
  * @return {Function}
@@ -41,6 +42,11 @@ function ratelimit(opts = {}) {
   return async function ratelimit(ctx, next) {
     const id = opts.id ? opts.id(ctx) : ctx.ip;
     const whitelisted = typeof opts.whitelist === 'function' ? opts.whitelist(ctx) : false;
+    const blacklisted = typeof opts.blacklist === 'function' ? opts.blacklist(ctx) : false;
+
+    if (blacklisted) {
+      ctx.throw(403, 'Forbidden')
+    }
 
     if (false === id || true === whitelisted) return await next();
 
