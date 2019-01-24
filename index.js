@@ -41,8 +41,8 @@ function ratelimit(opts = {}) {
 
   return async function ratelimit(ctx, next) {
     const id = opts.id ? opts.id(ctx) : ctx.ip;
-    const whitelisted = typeof opts.whitelist === 'function' ? opts.whitelist(ctx) : false;
-    const blacklisted = typeof opts.blacklist === 'function' ? opts.blacklist(ctx) : false;
+    const whitelisted = typeof opts.whitelist === 'function' ? await opts.whitelist(ctx) : false;
+    const blacklisted = typeof opts.blacklist === 'function' ? await opts.blacklist(ctx) : false;
 
     if (true === blacklisted) {
       ctx.throw(403, 'Forbidden')
