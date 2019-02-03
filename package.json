@@ -14,16 +14,16 @@
     "index.js"
   ],
   "dependencies": {
-    "debug": "^3.1.0",
+    "debug": "^4.1.1",
     "ms": "^2.1.1",
-    "ratelimiter": "^3.0.3"
+    "ratelimiter": "^3.2.0"
   },
   "devDependencies": {
-    "ioredis": "^3.2.2",
-    "koa": "^2.5.1",
+    "ioredis": "^4.6.2",
+    "koa": "^2.7.0",
     "mocha": "^5.2.0",
-    "should": "^13.2.1",
-    "supertest": "^3.1.0"
+    "should": "^13.2.3",
+    "supertest": "^3.4.2"
   },
   "scripts": {
     "test": "NODE_ENV=test mocha --reporter spec --exit"
