@@ -21,9 +21,9 @@ module.exports = ratelimit;
  * - `db` database connection
  * - `id` id to compare requests [ip]
  * - `headers` custom header names
- *  - `remaining` remaining number of requests ['X-RateLimit-Remaining']
- *  - `reset` reset timestamp ['X-RateLimit-Reset']
- *  - `total` total number of requests ['X-RateLimit-Limit']
+ * - `remaining` remaining number of requests ['X-RateLimit-Remaining']
+ * - `reset` reset timestamp ['X-RateLimit-Reset']
+ * - `total` total number of requests ['X-RateLimit-Limit']
  * - `whitelist` whitelist function [false]
  * - `blacklist` blacklist function [false]
  *
@@ -44,11 +44,11 @@ function ratelimit(opts = {}) {
     const whitelisted = typeof opts.whitelist === 'function' ? await opts.whitelist(ctx) : false;
     const blacklisted = typeof opts.blacklist === 'function' ? await opts.blacklist(ctx) : false;
 
-    if (true === blacklisted) {
+    if (blacklisted) {
       ctx.throw(403, 'Forbidden')
     }
 
-    if (false === id || true === whitelisted) return await next();
+    if (false === id || whitelisted) return await next();
 
     // initialize limiter
     const limiter = new Limiter(Object.assign({}, opts, { id }));

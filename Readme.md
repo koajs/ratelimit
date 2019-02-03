@@ -63,9 +63,9 @@ console.log('listening on port 3000');
  - `headers` custom header names
  - `max` max requests within `duration` [2500]
  - `disableHeader` set whether send the `remaining, reset, total` headers [false]
-  - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
-  - `reset` reset timestamp [`'X-RateLimit-Reset'`]
-  - `total` total number of requests [`'X-RateLimit-Limit'`]
+ - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
+ - `reset` reset timestamp [`'X-RateLimit-Reset'`]
+ - `total` total number of requests [`'X-RateLimit-Limit'`]
 
 ## Responses
 
