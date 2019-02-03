@@ -157,6 +157,87 @@ describe('ratelimit middleware', () => {
     });
   });
 
+  describe('whitelist', () => {
+    const duration = 1000;
+    let guard;
+    let app;
+
+    const hitOnce = () => guard.should.equal(1);
+
+    beforeEach(async () => {
+      app = new Koa();
+
+      app.use(ratelimit({
+        db,
+        whitelist: (ctx) => ctx.request.header.foo === 'whitelistme',
+        max: 1
+      }));
+      app.use(async (ctx) => {
+        guard++;
+        ctx.body = 'foo';
+      });
+
+      guard = 0;
+
+      await sleep(duration);
+      await request(app.listen())
+        .get('/')
+        .expect(200)
+        .expect(hitOnce)
+    });
+
+    it('should not limit if satisfy whitelist function', async () => {
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'whitelistme')
+        .expect(200)
+
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'whitelistme')
+        .expect(200)
+    });
+
+    it('should limit as usual if not whitelist return false', async () => {
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'imnotwhitelisted')
+        .expect(429)
+    });
+  })
+
+  describe('blacklist', () => {
+    let app;
+
+    beforeEach(async () => {
+      app = new Koa();
+
+      app.use(ratelimit({
+        db,
+        blacklist: (ctx) => ctx.request.header.foo === 'blacklisted',
+        max: 1
+      }));
+      app.use(async (ctx) => {
+        ctx.body = 'foo';
+      });
+
+    });
+
+    it('should throw 403 if blacklisted', async () => {
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'blacklisted')
+        .expect(403)
+    });
+
+    it('should return 200 when not blacklisted', async () => {
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'imnotblacklisted')
+        .expect(200)
+    });
+  })
+
   describe('custom headers', () => {
     it('should allow specifying custom header names', async () => {
       const app = new Koa();
