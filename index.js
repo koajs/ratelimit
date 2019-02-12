@@ -37,6 +37,7 @@ module.exports = ratelimit;
 
 function ratelimit(opts = {}) {
   const defaultOpts = {
+    driver: 'redis',
     duration: 60 * 60 * 1000, // 1 hour
     max: 2500,
     id: ctx => ctx.ip,
