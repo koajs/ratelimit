@@ -5,7 +5,9 @@
 
 const debug = require('debug')('koa-ratelimit');
 const Limiter = require('ratelimiter');
+const MemoryLimiter = require('./limiter/memory');
 const ms = require('ms');
+const defaults = require('lodash.defaults');
 
 /**
  * Expose `ratelimit()`.
@@ -16,9 +18,10 @@ module.exports = ratelimit;
 /**
  * Initialize ratelimit middleware with the given `opts`:
  *
+ * - `driver` redis or memory [redis]
  * - `duration` limit duration in milliseconds [1 hour]
  * - `max` max requests per `id` [2500]
- * - `db` database connection
+ * - `db` database connection if redis. Map instance if memory
  * - `id` id to compare requests [ip]
  * - `headers` custom header names
  * - `remaining` remaining number of requests ['X-RateLimit-Remaining']
@@ -33,14 +36,28 @@ module.exports = ratelimit;
  */
 
 function ratelimit(opts = {}) {
+  const defaultOpts = {
+    duration: 60 * 60 * 1000, // 1 hour
+    max: 2500,
+    id: ctx => ctx.ip,
+    headers: {
+      remaining: 'X-RateLimit-Remaining',
+      reset: 'X-RateLimit-Reset',
+      total: 'X-RateLimit-Limit'
+    }
+  }
+
+  defaults(opts, defaultOpts)
+
   const {
     remaining = 'X-RateLimit-Remaining',
     reset = 'X-RateLimit-Reset',
     total = 'X-RateLimit-Limit'
-  } = opts.headers || {}
+  } = opts.headers
 
   return async function ratelimit(ctx, next) {
-    const id = opts.id ? opts.id(ctx) : ctx.ip;
+    const id = opts.id(ctx)
+    const { driver } = opts;
     const whitelisted = typeof opts.whitelist === 'function' ? await opts.whitelist(ctx) : false;
     const blacklisted = typeof opts.blacklist === 'function' ? await opts.blacklist(ctx) : false;
 
@@ -51,7 +68,14 @@ function ratelimit(opts = {}) {
     if (false === id || whitelisted) return await next();
 
     // initialize limiter
-    const limiter = new Limiter(Object.assign({}, opts, { id }));
+    let limiter
+    if (driver === 'memory') {
+      limiter = new MemoryLimiter(Object.assign({}, opts, { id }));
+    } else if (driver === 'redis') {
+      limiter = new Limiter(Object.assign({}, opts, { id }));
+    } else {
+      throw new Error(`invalid driver. Expecting memory or redis, got ${driver}`)
+    }
 
     // check limit
     const limit = await thenify(limiter.get.bind(limiter));
