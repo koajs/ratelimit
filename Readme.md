@@ -42,6 +42,12 @@ app.use(ratelimit({
   },
   max: 100,
   disableHeader: false,
+  whitelist: (ctx) => {
+    // some logic that returns a boolean
+  },
+  blacklist: (ctx) => {
+    // some logic that returns a boolean
+  }
 }));
 
 // response middleware
@@ -66,6 +72,8 @@ console.log('listening on port 3000');
  - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
  - `reset` reset timestamp [`'X-RateLimit-Reset'`]
  - `total` total number of requests [`'X-RateLimit-Limit'`]
+ - `whitelist` if function returns true, middleware exits before limiting
+ - `blacklist` if function returns true, `403` error is thrown
 
 ## Responses
 
