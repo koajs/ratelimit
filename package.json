@@ -11,7 +11,9 @@
     "rate"
   ],
   "files": [
-    "index.js"
+    "index.js",
+    "limiter/memory.js",
+    "limiter/redis.js"
   ],
   "dependencies": {
     "debug": "^4.1.1",
