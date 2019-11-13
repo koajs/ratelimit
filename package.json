@@ -11,10 +11,13 @@
     "rate"
   ],
   "files": [
-    "index.js"
+    "index.js",
+    "limiter/memory.js",
+    "limiter/redis.js"
   ],
   "dependencies": {
     "debug": "^4.1.1",
+    "lodash.defaults": "^4.2.0",
     "ms": "^2.1.1",
     "ratelimiter": "^3.2.0"
   },

@@ -31,6 +31,7 @@ const app = new Koa();
 // apply rate limit
 
 app.use(ratelimit({
+  driver: 'redis',
   db: new Redis(),
   duration: 60000,
   errorMessage: 'Sometimes You Just Have to Slow Down.',
@@ -62,7 +63,8 @@ console.log('listening on port 3000');
 
 ## Options
 
- - `db` redis connection instance
+ - `driver` memory or redis [redis]
+ - `db` redis connection instance or Map instance (memory)
  - `duration` of limit in milliseconds [3600000]
  - `errorMessage` custom error message
  - `id` id to compare requests [ip]

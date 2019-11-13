@@ -7,7 +7,7 @@ const should = require('should');
 const ratelimit = require('..');
 const db = new Redis();
 
-describe('ratelimit middleware', () => {
+describe('ratelimit middleware with redis driver', () => {
   const duration = 1000;
   const goodBody = 'Num times hit:';
 
@@ -22,7 +22,8 @@ describe('ratelimit middleware', () => {
     beforeEach(async () => {
       app = new Koa();
 
-      app.use(ratelimit({ duration, db, max: 1 }));
+      app.use(ratelimit({
+        driver: 'redis', driver: 'redis', duration, db, max: 1 }));
       app.use(async (ctx) => {
         guard++;
         ctx.body = `${goodBody} ${guard}`;
@@ -72,6 +73,8 @@ describe('ratelimit middleware', () => {
       });
 
       app.use(ratelimit({
+        driver: 'redis',
+        driver: 'redis',
         db,
         duration,
         max: 1,
@@ -107,6 +110,7 @@ describe('ratelimit middleware', () => {
       const app = new Koa();
 
       app.use(ratelimit({
+        driver: 'redis',
         db,
         id: (ctx) => ctx.request.header.foo,
         max: 1
@@ -122,6 +126,7 @@ describe('ratelimit middleware', () => {
       const app = new Koa();
 
       app.use(ratelimit({
+        driver: 'redis',
         db,
         id: (ctx) => false,
         max: 5
@@ -136,6 +141,7 @@ describe('ratelimit middleware', () => {
       const app = new Koa();
 
       app.use(ratelimit({
+        driver: 'redis',
         db,
         id: (ctx) => ctx.request.header.foo,
         max: 1
@@ -168,6 +174,7 @@ describe('ratelimit middleware', () => {
       app = new Koa();
 
       app.use(ratelimit({
+        driver: 'redis',
         db,
         whitelist: (ctx) => ctx.request.header.foo === 'whitelistme',
         max: 1
@@ -213,6 +220,8 @@ describe('ratelimit middleware', () => {
       app = new Koa();
 
       app.use(ratelimit({
+        driver: 'redis',
+        driver: 'redis',
         db,
         blacklist: (ctx) => ctx.request.header.foo === 'blacklisted',
         max: 1
@@ -243,6 +252,8 @@ describe('ratelimit middleware', () => {
       const app = new Koa();
 
       app.use(ratelimit({
+        driver: 'redis',
+        driver: 'redis',
         db,
         headers: {
           remaining: 'Rate-Limit-Remaining',
@@ -268,6 +279,10 @@ describe('ratelimit middleware', () => {
       const errorMessage = 'Sometimes You Just Have to Slow Down.';
 
       app.use(ratelimit({
+        driver: 'redis',
+        driver: 'redis',
+        driver: 'redis',
+        driver: 'redis',
         db,
         errorMessage,
         max: 1
@@ -291,6 +306,9 @@ describe('ratelimit middleware', () => {
       const app = new Koa();
 
       app.use(ratelimit({
+        driver: 'redis',
+        driver: 'redis',
+        driver: 'redis',
         db,
         max: 1,
       }));
@@ -316,6 +334,8 @@ describe('ratelimit middleware', () => {
       const app = new Koa();
 
       app.use(ratelimit({
+        driver: 'redis',
+        driver: 'redis',
         db,
         headers: {
           remaining: 'Rate-Limit-Remaining',

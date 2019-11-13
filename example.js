@@ -7,6 +7,7 @@ const app = new Koa();
 // apply rate limit
 
 app.use(ratelimit({
+  driver: 'redis',
   db: new Redis(),
   duration: 60000,
   max: 10
