@@ -43,6 +43,15 @@ describe('ratelimit middleware with memory driver', () => {
         .expect(429);
     });
 
+    it('responds with 429 when rate limit is exceeded and remaining is 0', async () => {
+      await request(app.listen()).get('/');
+
+      await request(app.listen())
+        .get('/')
+        .expect('X-RateLimit-Remaining', '0')
+        .expect(429);
+    });
+
     it('should not yield downstream if ratelimit is exceeded', async () => {
       await request(app.listen())
         .get('/')

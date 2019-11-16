@@ -89,7 +89,7 @@ Limiter.prototype.get = function (fn) {
     db.set(key, initState);
     fn(null, initState);
   } else {
-    entry.remaining -= 1;
+    entry.remaining = entry.remaining > 0 ? entry.remaining - 1 : 0;
     fn(null, entry);
   }
 }
