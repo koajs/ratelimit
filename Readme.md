@@ -22,6 +22,8 @@ $ npm install koa-ratelimit
 
 ## Example
 
+### With a Redis driver
+
 ```js
 const Koa = require('koa');
 const ratelimit = require('koa-ratelimit');
@@ -33,6 +35,48 @@ const app = new Koa();
 app.use(ratelimit({
   driver: 'redis',
   db: new Redis(),
+  duration: 60000,
+  errorMessage: 'Sometimes You Just Have to Slow Down.',
+  id: (ctx) => ctx.ip,
+  headers: {
+    remaining: 'Rate-Limit-Remaining',
+    reset: 'Rate-Limit-Reset',
+    total: 'Rate-Limit-Total'
+  },
+  max: 100,
+  disableHeader: false,
+  whitelist: (ctx) => {
+    // some logic that returns a boolean
+  },
+  blacklist: (ctx) => {
+    // some logic that returns a boolean
+  }
+}));
+
+// response middleware
+
+app.use(async (ctx) => {
+  ctx.body = 'Stuff!';
+});
+
+app.listen(3000);
+console.log('listening on port 3000');
+```
+
+### With a memory driver
+
+```js
+const Koa = require('koa');
+const ratelimit = require('koa-ratelimit');
+const app = new Koa();
+
+// apply rate limit
+
+const db = new Map();
+
+app.use(ratelimit({
+  driver: 'memory',
+  db: db,
   duration: 60000,
   errorMessage: 'Sometimes You Just Have to Slow Down.',
   id: (ctx) => ctx.ip,
