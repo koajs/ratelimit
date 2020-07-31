@@ -120,6 +120,7 @@ console.log('listening on port 3000');
  - `total` total number of requests [`'X-RateLimit-Limit'`]
  - `whitelist` if function returns true, middleware exits before limiting
  - `blacklist` if function returns true, `403` error is thrown
+ - `throw` call ctx.throw if true
 
 ## Responses
 

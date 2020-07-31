@@ -29,6 +29,7 @@ module.exports = ratelimit;
  * - `total` total number of requests ['X-RateLimit-Limit']
  * - `whitelist` whitelist function [false]
  * - `blacklist` blacklist function [false]
+ * - `throw` call ctx.throw if true
  *
  * @param {Object} opts
  * @return {Function}
