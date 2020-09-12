@@ -103,7 +103,7 @@ module.exports = function ratelimit (opts = {}) {
     const after = limit.reset - (Date.now() / 1000) | 0
     ctx.set('Retry-After', after)
 
-    ctx.status = 429
+    ctx.status = opts.status || 429
     ctx.body = opts.errorMessage || `Rate limit exceeded, retry in ${ms(delta, { long: true })}.`
 
     if (opts.throw) {
