@@ -21,8 +21,6 @@
     "rate"
   ],
   "repository": "koajs/ratelimit",
-  "author": "",
-  "contributors": [],
   "license": "MIT",
   "dependencies": {
     "async-ratelimiter": "^1.2.8",
