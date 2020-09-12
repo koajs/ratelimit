@@ -1,21 +1,17 @@
+'use strict'
 
 /**
  * Module dependencies.
  */
 
-const debug = require('debug')('koa-ratelimit');
-const Limiter = require('ratelimiter');
-const MemoryLimiter = require('./limiter/memory');
-const ms = require('ms');
-const defaults = require('lodash.defaults');
+const debug = require('debug')('koa-ratelimit')
+const RedisLimiter = require('./limiter/redis')
+const MemoryLimiter = require('./limiter/memory')
+const ms = require('ms')
 
 /**
  * Expose `ratelimit()`.
- */
-
-module.exports = ratelimit;
-
-/**
+ *
  * Initialize ratelimit middleware with the given `opts`:
  *
  * - `driver` redis or memory [redis]
@@ -36,7 +32,7 @@ module.exports = ratelimit;
  * @api public
  */
 
-function ratelimit(opts = {}) {
+module.exports = function ratelimit (opts = {}) {
   const defaultOpts = {
     driver: 'redis',
     duration: 60 * 60 * 1000, // 1 hour
@@ -49,7 +45,7 @@ function ratelimit(opts = {}) {
     }
   }
 
-  defaults(opts, defaultOpts)
+  opts = { ...defaultOpts, ...opts }
 
   const {
     remaining = 'X-RateLimit-Remaining',
@@ -57,76 +53,61 @@ function ratelimit(opts = {}) {
     total = 'X-RateLimit-Limit'
   } = opts.headers
 
-  return async function ratelimit(ctx, next) {
+  return async function ratelimit (ctx, next) {
     const id = opts.id(ctx)
-    const { driver } = opts;
-    const whitelisted = typeof opts.whitelist === 'function' ? await opts.whitelist(ctx) : false;
-    const blacklisted = typeof opts.blacklist === 'function' ? await opts.blacklist(ctx) : false;
+    const { driver } = opts
+    const whitelisted = typeof opts.whitelist === 'function' && await opts.whitelist(ctx)
+    const blacklisted = typeof opts.blacklist === 'function' && await opts.blacklist(ctx)
 
     if (blacklisted) {
       ctx.throw(403, 'Forbidden')
     }
 
-    if (false === id || whitelisted) return await next();
+    if (id === false || whitelisted) return await next()
 
     // initialize limiter
     let limiter
     if (driver === 'memory') {
-      limiter = new MemoryLimiter(Object.assign({}, opts, { id }));
+      limiter = new MemoryLimiter({ ...opts, id })
     } else if (driver === 'redis') {
-      limiter = new Limiter(Object.assign({}, opts, { id }));
+      limiter = new RedisLimiter({ ...opts, id })
     } else {
       throw new Error(`invalid driver. Expecting memory or redis, got ${driver}`)
     }
 
     // check limit
-    const limit = await thenify(limiter.get.bind(limiter));
+    const limit = await limiter.get()
 
     // check if current call is legit
-    const calls = limit.remaining > 0 ? limit.remaining - 1 : 0;
+    const calls = limit.remaining > 0 ? limit.remaining - 1 : 0
 
     // check if header disabled
-    const disableHeader = opts.disableHeader || false;
+    const disableHeader = opts.disableHeader || false
 
-    let headers = {};
+    let headers = {}
     if (!disableHeader) {
       // header fields
       headers = {
         [remaining]: calls,
         [reset]: limit.reset,
         [total]: limit.total
-      };
+      }
 
-      ctx.set(headers);
+      ctx.set(headers)
     }
 
-    debug('remaining %s/%s %s', remaining, limit.total, id);
-    if (limit.remaining) return await next();
+    debug('remaining %s/%s %s', remaining, limit.total, id)
+    if (limit.remaining) return await next()
 
-    const delta = (limit.reset * 1000) - Date.now() | 0;
-    const after = limit.reset - (Date.now() / 1000) | 0;
-    ctx.set('Retry-After', after);
+    const delta = (limit.reset * 1000) - Date.now() | 0
+    const after = limit.reset - (Date.now() / 1000) | 0
+    ctx.set('Retry-After', after)
 
-    ctx.status = 429;
-    ctx.body = opts.errorMessage || `Rate limit exceeded, retry in ${ms(delta, { long: true })}.`;
+    ctx.status = 429
+    ctx.body = opts.errorMessage || `Rate limit exceeded, retry in ${ms(delta, { long: true })}.`
 
     if (opts.throw) {
-      ctx.throw(ctx.status, ctx.body, { headers });
+      ctx.throw(ctx.status, ctx.body, { headers })
     }
   }
-}
-
-/**
- * Helper function to convert a callback to a Promise.
- */
-
-async function thenify(fn) {
-  return await new Promise(function(resolve, reject) {
-    function callback(err, res) {
-      if (err) return reject(err);
-      return resolve(res);
-    }
-
-    fn(callback);
-  });
 }
