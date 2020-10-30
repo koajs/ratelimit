@@ -1,24 +1,22 @@
-
 # koa-ratelimit
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
 [![node version][node-image]][node-url]
 
-[npm-image]: https://img.shields.io/npm/v/koa-ratelimit.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/koa-ratelimit
-[travis-image]: https://img.shields.io/travis/koajs/ratelimit.svg?style=flat-square
-[travis-url]: https://travis-ci.org/koajs/ratelimit
-[node-image]: https://img.shields.io/badge/node.js-%3E=_7.6-red.svg?style=flat-square
-[node-url]: http://nodejs.org/download/
 
- Rate limiter middleware for koa.
+Rate limiter middleware for koa.
+
 
 ## Installation
 
-```js
+```bash
+# npm
 $ npm install koa-ratelimit
+# yarn
+$ yarn add koa-ratelimit
 ```
+
 
 ## Example
 
@@ -31,7 +29,6 @@ const Redis = require('ioredis');
 const app = new Koa();
 
 // apply rate limit
-
 app.use(ratelimit({
   driver: 'redis',
   db: new Redis(),
@@ -54,13 +51,15 @@ app.use(ratelimit({
 }));
 
 // response middleware
-
 app.use(async (ctx) => {
   ctx.body = 'Stuff!';
 });
 
-app.listen(3000);
-console.log('listening on port 3000');
+// run server
+app.listen(
+  3000,
+  () => console.log('listening on port 3000')
+);
 ```
 
 ### With a memory driver
@@ -71,7 +70,6 @@ const ratelimit = require('koa-ratelimit');
 const app = new Koa();
 
 // apply rate limit
-
 const db = new Map();
 
 app.use(ratelimit({
@@ -96,35 +94,39 @@ app.use(ratelimit({
 }));
 
 // response middleware
-
 app.use(async (ctx) => {
   ctx.body = 'Stuff!';
 });
 
-app.listen(3000);
-console.log('listening on port 3000');
+// run server
+app.listen(
+  3000,
+  () => console.log('listening on port 3000')
+);
 ```
+
 
 ## Options
 
- - `driver` memory or redis [redis]
- - `db` redis connection instance or Map instance (memory)
- - `duration` of limit in milliseconds [3600000]
- - `errorMessage` custom error message
- - `id` id to compare requests [ip]
- - `headers` custom header names
- - `max` max requests within `duration` [2500]
- - `disableHeader` set whether send the `remaining, reset, total` headers [false]
- - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
- - `reset` reset timestamp [`'X-RateLimit-Reset'`]
- - `total` total number of requests [`'X-RateLimit-Limit'`]
- - `whitelist` if function returns true, middleware exits before limiting
- - `blacklist` if function returns true, `403` error is thrown
- - `throw` call ctx.throw if true
+  - `driver` memory or redis [redis]
+  - `db` redis connection instance or Map instance (memory)
+  - `duration` of limit in milliseconds [3600000]
+  - `errorMessage` custom error message
+  - `id` id to compare requests [ip]
+  - `headers` custom header names
+  - `max` max requests within `duration` [2500]
+  - `disableHeader` set whether send the `remaining, reset, total` headers [false]
+  - `remaining` remaining number of requests [`'X-RateLimit-Remaining'`]
+  - `reset` reset timestamp [`'X-RateLimit-Reset'`]
+  - `total` total number of requests [`'X-RateLimit-Limit'`]
+  - `whitelist` if function returns true, middleware exits before limiting
+  - `blacklist` if function returns true, `403` error is thrown
+  - `throw` call ctx.throw if true
+
 
 ## Responses
 
- Example 200 with header fields:
+Example 200 with header fields:
 
 ```
 HTTP/1.1 200 OK
@@ -140,7 +142,7 @@ Connection: keep-alive
 Stuff!
 ```
 
- Example 429 response:
+Example 429 response:
 
 ```
 HTTP/1.1 429 Too Many Requests
@@ -157,6 +159,17 @@ Connection: keep-alive
 Rate limit exceeded, retry in 8 seconds
 ```
 
+
 ## License
 
- MIT
+[MIT](LICENSE)
+
+
+##
+
+[npm-image]: https://img.shields.io/npm/v/koa-ratelimit.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/koa-ratelimit
+[travis-image]: https://img.shields.io/travis/koajs/ratelimit.svg?style=flat-square
+[travis-url]: https://travis-ci.org/koajs/ratelimit
+[node-image]: https://img.shields.io/badge/node.js-%3E=_10-green.svg?style=flat-square
+[node-url]: http://nodejs.org/download/
