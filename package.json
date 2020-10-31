@@ -1,6 +1,6 @@
 {
   "name": "koa-ratelimit",
-  "version": "4.2.1",
+  "version": "5.0.0",
   "description": "Rate limiter middleware for koa",
   "files": [
     "index.js",
