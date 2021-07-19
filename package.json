@@ -23,7 +23,7 @@
   "repository": "koajs/ratelimit",
   "license": "MIT",
   "dependencies": {
-    "async-ratelimiter": "^1.2.8",
+    "async-ratelimiter": "^1.3.0",
     "debug": "^4.1.1",
     "ms": "^2.1.2"
   },
