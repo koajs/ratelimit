@@ -107,6 +107,7 @@ module.exports = function ratelimit (opts = {}) {
     ctx.body = opts.errorMessage || `Rate limit exceeded, retry in ${ms(delta, { long: true })}.`
 
     if (opts.throw) {
+      headers['Retry-After'] = after
       ctx.throw(ctx.status, ctx.body, { headers })
     }
   }
