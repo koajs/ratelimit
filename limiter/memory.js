@@ -12,7 +12,7 @@ const assert = require('assert')
 const time = Date.now() * 1e3
 const start = process.hrtime()
 
-function getMicrotime () {
+function getMicrotime() {
   const diff = process.hrtime(start)
   return time + diff[0] * 1e6 + Math.round(diff[1] * 1e-3)
 }
@@ -30,18 +30,19 @@ function getMicrotime () {
  * @api public
  */
 
+const defaultDb = new Map()
 module.exports = class Limiter {
-  constructor ({ id, db, max, duration, namespace = 'limit' }) {
+  constructor({ id, db, max, duration, namespace = 'limit' }) {
     this.id = id
     assert(this.id, '.id required')
-    this.db = db || new Map()
+    this.db = db || defaultDb
     assert(this.db instanceof Map, 'for memory driver, .db must be Map instance')
     this.max = max
     this.duration = duration
     this.key = `${namespace}:${this.id}`
   }
 
-  async get () {
+  async get() {
     const { id, db, duration, key, max } = this
 
     const entry = db.get(key)
