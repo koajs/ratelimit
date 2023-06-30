@@ -113,6 +113,7 @@ app.listen(
   - `duration` of limit in milliseconds [3600000]
   - `errorMessage` custom error message
   - `id` id to compare requests [ip]
+  - `namespace` prefix for storage driver key name [limit]
   - `headers` custom header names
   - `max` max requests within `duration` [2500]
   - `disableHeader` set whether send the `remaining, reset, total` headers [false]
