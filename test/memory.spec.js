@@ -63,18 +63,20 @@ describe('ratelimit middleware with memory driver', () => {
   describe('limit with throw', () => {
     let guard
     let app
+    let errorWasThrown
 
     const hitOnce = () => guard.should.equal(1)
 
     beforeEach(async () => {
       app = new Koa()
+      errorWasThrown = false
 
       app.use(async (ctx, next) => {
         try {
           await next()
         } catch (e) {
-          ctx.body = e.message
-          ctx.set(Object.assign({ 'X-Custom': 'foobar' }, e.headers))
+          errorWasThrown = true
+          throw e
         }
       })
 
@@ -103,10 +105,13 @@ describe('ratelimit middleware with memory driver', () => {
     it('responds with 429 when rate limit is exceeded', async () => {
       await request(app.listen())
         .get('/')
-        .expect('X-Custom', 'foobar')
         .expect('X-RateLimit-Remaining', '0')
+        .expect('Retry-After', '0')
         .expect((res) => res.error.text.should.match(/^Rate limit exceeded, retry in.*/))
         .expect(429)
+        .then(() => {
+          errorWasThrown.should.equal(true)
+        })
     })
   })
 
