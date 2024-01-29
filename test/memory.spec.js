@@ -356,6 +356,26 @@ describe('ratelimit middleware with memory driver', () => {
         })
     })
   })
+
+  describe('onLimit', async () => {
+    it('should allow specifying an onLimit callback', async () => {
+      const app = new Koa()
+      let testValue = 0;
+
+      app.use(ratelimit({
+        driver: 'memory',
+        db,
+        max: 0,
+        onLimit: (ctx) => { testValue = 1 }
+      }))
+
+      await request(app.listen())
+        .get('/')
+        .set('foo', 'bar')
+        .expect(testValue, 1)
+    })
+  })
+
 })
 
 async function sleep (ms) {

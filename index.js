@@ -20,6 +20,7 @@ const ms = require('ms')
  * - `db` database connection if redis. Map instance if memory
  * - `id` id to compare requests [ip]
  * - `headers` custom header names
+ * - `onLimited` callback executed when visitor has been rate limited
  * - `remaining` remaining number of requests ['X-RateLimit-Remaining']
  * - `reset` reset timestamp ['X-RateLimit-Reset']
  * - `total` total number of requests ['X-RateLimit-Limit']
@@ -42,7 +43,8 @@ module.exports = function ratelimit (opts = {}) {
       remaining: 'X-RateLimit-Remaining',
       reset: 'X-RateLimit-Reset',
       total: 'X-RateLimit-Limit'
-    }
+    },
+    onLimit: undefined
   }
 
   opts = { ...defaultOpts, ...opts }
@@ -58,6 +60,7 @@ module.exports = function ratelimit (opts = {}) {
     const { driver } = opts
     const whitelisted = typeof opts.whitelist === 'function' && await opts.whitelist(ctx)
     const blacklisted = typeof opts.blacklist === 'function' && await opts.blacklist(ctx)
+    const { onLimited } = opts
 
     if (blacklisted) {
       ctx.throw(403, 'Forbidden')
@@ -101,10 +104,14 @@ module.exports = function ratelimit (opts = {}) {
 
     const delta = (limit.reset * 1000) - Date.now() | 0
     const after = limit.reset - (Date.now() / 1000) | 0
-    ctx.set('Retry-After', after)
+    const message = opts.errorMessage || `Rate limit exceeded, retry in ${ms(delta, { long: true })}.`
 
+    ctx.body = message
+    ctx.set('Retry-After', after)
+    ctx.state.rateLimit = { after, headers, id, message }
     ctx.status = opts.status || 429
-    ctx.body = opts.errorMessage || `Rate limit exceeded, retry in ${ms(delta, { long: true })}.`
+
+    if (onLimited) onLimited(ctx)
 
     if (opts.throw) {
       headers['Retry-After'] = after
