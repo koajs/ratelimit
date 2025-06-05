@@ -4,7 +4,8 @@
  * Module dependencies.
  */
 
-const debug = require('debug')('koa-ratelimit')
+const util = require('util')
+const debug = util.debuglog('koa-ratelimit')
 const RedisLimiter = require('./limiter/redis')
 const MemoryLimiter = require('./limiter/memory')
 const ms = require('ms')

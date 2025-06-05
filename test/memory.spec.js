@@ -1,4 +1,3 @@
-
 const Koa = require('koa')
 const request = require('supertest')
 
@@ -10,6 +9,34 @@ describe('ratelimit middleware with memory driver', () => {
   const goodBody = 'Num times hit:'
 
   beforeEach(async () => db.clear())
+
+  describe('auto-initialization', () => {
+    let guard
+    let app
+
+    const hitOnce = () => guard.should.equal(1)
+
+    beforeEach(async () => {
+      app = new Koa()
+
+      app.use(ratelimit({ driver: 'memory', duration, max: 1 }))
+      app.use(async (ctx) => {
+        guard++
+        ctx.body = `${goodBody} ${guard}`
+      })
+
+      guard = 0
+
+      await sleep(duration)
+    })
+
+    it('responds with 200 when rate limit is not exceeded', async () => {
+      await request(app.listen())
+        .get('/')
+        .expect(200, `${goodBody} 1`)
+        .expect(hitOnce)
+    })
+  })
 
   describe('limit', () => {
     let guard

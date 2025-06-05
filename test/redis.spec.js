@@ -1,4 +1,3 @@
-
 const Koa = require('koa')
 const Redis = require('ioredis')
 const request = require('supertest')
@@ -79,7 +78,6 @@ describe('ratelimit middleware with redis driver', () => {
       })
 
       app.use(ratelimit({
-        driver: 'redis',
         driver: 'redis',
         db,
         duration,
