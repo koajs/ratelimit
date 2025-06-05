@@ -408,8 +408,8 @@ describe('ratelimit middleware with memory driver', () => {
     });
   });
 
-  describe('onLimit', async () => {
-    it('should allow specifying an onLimit callback', async () => {
+  describe('onLimited', async () => {
+    it('should allow specifying an onLimited callback', async () => {
       const app = new Koa();
       let testValue = 0;
 
@@ -418,7 +418,7 @@ describe('ratelimit middleware with memory driver', () => {
           driver: 'memory',
           db,
           max: 0,
-          onLimit(ctx) {
+          onLimited(ctx) {
             testValue = 1;
           }
         })
@@ -427,7 +427,8 @@ describe('ratelimit middleware with memory driver', () => {
       await request(app.listen())
         .get('/')
         .set('foo', 'bar')
-        .expect(testValue, 1);
+        .expect(429)
+        .expect(() => testValue.should.equal(1));
     });
   });
 });

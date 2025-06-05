@@ -46,7 +46,7 @@ module.exports = function ratelimit(opts = {}) {
       reset: 'X-RateLimit-Reset',
       total: 'X-RateLimit-Limit'
     },
-    onLimit: undefined
+    onLimited: undefined
   };
 
   opts = { ...defaultOpts, ...opts };
@@ -64,7 +64,6 @@ module.exports = function ratelimit(opts = {}) {
       typeof opts.whitelist === 'function' && (await opts.whitelist(ctx));
     const blacklisted =
       typeof opts.blacklist === 'function' && (await opts.blacklist(ctx));
-    const { onLimited } = opts;
 
     if (blacklisted) {
       ctx.throw(403, 'Forbidden');
@@ -119,7 +118,7 @@ module.exports = function ratelimit(opts = {}) {
     ctx.state.rateLimit = { after, headers, id, message };
     ctx.status = opts.status || 429;
 
-    if (onLimited) onLimited(ctx);
+    if (opts.onLimited) opts.onLimited(ctx);
 
     if (opts.throw) {
       headers['Retry-After'] = after;

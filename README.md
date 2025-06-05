@@ -56,6 +56,9 @@ app.use(ratelimit({
   },
   blacklist: (ctx) => {
     // some logic that returns a boolean
+  },
+  onLimited: (ctx) => {
+    // optional function to run when a user is rate limited
   }
 }));
 
