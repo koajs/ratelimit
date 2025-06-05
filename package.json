@@ -2,30 +2,38 @@
   "name": "koa-ratelimit",
   "description": "Rate limiter middleware for koa",
   "version": "5.1.0",
+  "author": "Koa.js contributors",
   "bugs": {
     "url": "https://github.com/koajs/ratelimit/issues"
   },
+  "contributors": [
+    "Forward Email (https://forwardemail.net)"
+  ],
   "dependencies": {
     "async-ratelimiter": "^1.5.2",
     "ms": "^2.1.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "chai": "^5.2.0",
-    "eslint": "^8.57.1",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-node": "^11.1.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.55.0",
+    "eslint-config-xo-lass": "^2.0.1",
+    "fixpack": "^4.0.0",
     "husky": "^9.1.7",
     "ioredis": "^5.6.1",
     "koa": "^3.0.0",
+    "lint-staged": "^15.4.3",
     "mocha": "^11.5.0",
-    "nyc": "^17.1.0",
-    "rimraf": "^6.0.1",
+    "remark-cli": "11",
+    "remark-preset-github": "^4.0.4",
     "should": "^13.2.3",
-    "supertest": "^7.1.1"
+    "supertest": "^7.1.1",
+    "xo": "^0.56.0"
   },
   "engines": {
-    "node": ">= 18"
+    "node": ">=18"
   },
   "files": [
     "index.js",
@@ -41,13 +49,13 @@
     "ratelimiter"
   ],
   "license": "MIT",
+  "main": "index.js",
   "repository": "koajs/ratelimit",
   "scripts": {
-    "ci": "rimraf .nyc_output && npm run lint && npm run test-cov",
-    "lint": "eslint .",
+    "lint": "xo --fix && remark . -qfo && fixpack",
+    "pre-commit": "lint-staged",
     "prepare": "husky",
     "pretest": "npm run lint",
-    "test": "mocha -r should --exit",
-    "test-cov": "nyc npm run test"
+    "test": "mocha -r should --exit"
   }
 }

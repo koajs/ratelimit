@@ -1,1 +1,1 @@
-module.exports = require('async-ratelimiter')
+module.exports = require('async-ratelimiter');
