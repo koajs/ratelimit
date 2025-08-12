@@ -15,6 +15,8 @@
 * [Example](#example)
   * [With a Redis driver](#with-a-redis-driver)
   * [With a memory driver](#with-a-memory-driver)
+* [Group-Based Rate Limiting (New Feature)](#group-based-rate-limiting-new-feature)
+  * [Parameters](#parameters)
 * [Options](#options)
 * [Responses](#responses)
 * [License](#license)
@@ -116,6 +118,47 @@ app.listen(
   () => console.log('listening on port 3000')
 );
 ```
+
+
+## Group-Based Rate Limiting (New Feature)
+
+You can apply rate limits by group using the new `groupRateLimit` middleware:
+
+```js
+const Koa = require('koa');
+const { groupRateLimit } = require('koa-ratelimit');
+
+const app = new Koa();
+
+app.use(
+  groupRateLimit({
+    routeMap: {
+      user: {
+        duration: 60000,
+        max: 10,
+        id: (ctx) => ctx.ip
+      },
+      admin: {
+        duration: 60000,
+        max: 100,
+        id: (ctx) => ctx.ip
+      }
+    },
+    groupBy: (ctx) => (ctx.path.startsWith('/admin') ? 'admin' : 'user')
+  })
+);
+
+app.use((ctx) => {
+  ctx.body = 'Hello, rate limited world!';
+});
+```
+
+### Parameters
+
+* `routeMap`: Object mapping group names to individual `ratelimit` configurations.
+* `groupBy(ctx)`: Function that returns a group name for the current request.
+
+This enables route-aware rate limiting logic for better control across app segments.
 
 
 ## Options
