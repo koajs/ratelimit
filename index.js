@@ -126,3 +126,5 @@ module.exports = function ratelimit(opts = {}) {
     }
   };
 };
+
+module.exports.groupRateLimit = require('./group-limiter');
